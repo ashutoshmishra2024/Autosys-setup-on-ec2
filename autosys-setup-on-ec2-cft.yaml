@@ -1,1 +1,51 @@
-test
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.medium
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  AMI:
+    Type: String
+    Default: ami-0abcdef1234567890  # Replace with your preferred AMI
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          setup:
+            - install_autosys
+        install_autosys:
+          packages:
+            yum:
+              java-1.8.0-openjdk: []
+              unzip: []
+          files:
+            "/home/ec2-user/install_autosys.sh":
+              content: |
+                #!/bin/bash
+                echo "Installing AutoSys..."
+                # Add your AutoSys installation steps here
+              mode: '000755'
+              owner: ec2-user
+              group: ec2-user
+          services:
+            sysvinit:
+              autosys:
+                enabled: true
+                ensureRunning: true
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMI
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets setup --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource EC2Instance --region ${AWS::Region}
+
