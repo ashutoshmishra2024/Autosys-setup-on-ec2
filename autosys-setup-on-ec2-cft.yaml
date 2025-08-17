@@ -1,13 +1,49 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
-  InstanceType:
+
+  Environment:
     Type: String
+    Description: Deployment environment (e.g., dev, test, prod)
+
+  SubnetID:
+    Type: String
+    Description: "Please Enter The Subnet ID"
+    
+  AutosysInstanceType:
+    Type: String
+    Description: AMI for Autosys Instance
     Default: t3.medium
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
+
   AMI:
     Type: String
     Default: ami-0abcdef1234567890  # Replace with your preferred AMI
+
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+
+  AutosysEC2Role:
+    Type: string
+    Description: IAM Role
+
+  KmsKey:
+    Type: string
+    Description: "KMS key for EC2"
+
+  AutosysSecurityGroup:
+    Type: string
+    Description: "Security Group of Autosys Instances"
+
+  AutosysEBSVolume:
+    Type: Number
+    Description: "EbS volume for Autosys Sever"
+
+  SFTPEBSVolume:
+    Type: Number
+    Description: "SFTP volume for Autosys Server"
+
+  AutosysBackupPeriod:
+    Type: string
+    Description: "Tag for creating snapshot for DR"
 
 Resources:
   EC2Instance:
